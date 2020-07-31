@@ -1,66 +1,51 @@
-// pages/order/order.js
+import { request } from "../../request/index";
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    tabs: [
+      {
+        id: 0,
+        value: '全部',
+        isActive: true
+      },
+      {
+        id: 1,
+        value: '待付款',
+        isActive: false
+      },
+      {
+        id: 2,
+        value: '待发货',
+        isActive: false
+      },
+      {
+        id: 3,
+        value: '退款/退货',
+        isActive: false
+      }
+    ],
   },
-
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-
+  onShow: function (options) {
+    //获取当前小程序的页面栈 长度最大10页
+    let pages = getCurrentPages();
+    let currentPage = pages[pages.length - 1];
+    const { type } = currentPage.options;
+    this.changeTitleByIndex(type - 1);
+    this.getOrders(type);
   },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-
+  //获取订单列表的方法
+  async getOrders(type) {
+    const res = await request({ url: "/my/orders/all", data: { type } });
+    console.log(res)
   },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-
+  //根据标题索引来激活选中标题数组
+  changeTitleByIndex(index) {
+    let { tabs } = this.data;
+    tabs.forEach((d, i) => i === index ? d.isActive = true : d.isActive = false);
+    this.setData({ tabs })
   },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
-
+  handleTabsItemChange(e) {
+    const { index } = e.detail;
+    this.changeTitleByIndex(index);
+    this.getOrders(index + 1);
   }
 })
